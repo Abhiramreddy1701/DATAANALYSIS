@@ -139,7 +139,7 @@ model = load_model('/content/model.h5')
 class_names = ['its a ripe','its unripe']
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
-image = Image.open("/content/drive/MyDrive/train (1)/Unripe/1 (12).jpg").convert("RGB")
+image = Image.open("/content/drive/MyDrive/train (1)/Ripe/1 (15).jpg").convert("RGB")
 size = (224, 224)
 image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
 image_array = np.asarray(image)
