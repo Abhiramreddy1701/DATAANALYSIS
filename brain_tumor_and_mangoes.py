@@ -59,96 +59,28 @@ history = model.fit(train_generator,validation_data=val_generator,epochs=5)
 
 model.save("Model.h5","label.txt")
 
-from keras.models import load_model
+#test your image
+from keras.models import load_model  # TensorFlow is required for Keras to work
+from PIL import Image,ImageOps
+from tensorflow.keras.preprocessing import image
 import numpy as np
-from PIL import Image, ImageOps
+
+#load the model
 model = load_model('/content/Model.h5')
-class_names = ['You have Brain Tumor','You do not have Brain Tumor']
-data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+#load and preproces the test image 
+test_image_path ='/content/drive/MyDrive/test (1)/pred/pred14.jpg'
+img=image.load_img(test_image_path,target_size=(224,224))
+img_array=image.img_to_array(img)
+img_array=np.expand_dims(img_array,axis=0)
+img_array/=255
 
-image = Image.open("/content/drive/MyDrive/test/pred/pred37.jpg").convert("RGB")
-size = (224, 224)
-image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
-image_array = np.asarray(image)
-normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
-data[0] = normalized_image_array
+#Make predicitons 
+prediction = model.predict(img_array)
 
-prediction = model.predict(data)
-index = np.argmax(prediction)
-confidence_score = prediction[0][index]
-print("Result: ", class_names[index], end="")
-print("\n")
-print("Accuracy: ", confidence_score)
+#print the prediciton
+if prediction<0.5:
+  print("Prediction : No Brain Tumor (Probability : ",prediction[0][0],")")
+else:
+  print("Prediction : Brain Tumor (Probability : ",prediction[0][0],")")
 
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-IMG_SIZE = 224
-BATCH_SIZE = 32
 
-train_datagen = ImageDataGenerator(
-    rescale=1./255,
-    validation_split=0.2)
-train_generator = train_datagen.flow_from_directory("/content/drive/MyDrive/train (1)",
-    target_size=(IMG_SIZE, IMG_SIZE),
-    batch_size=BATCH_SIZE,
-    class_mode='binary',
-    subset='training')
-val_generator = train_datagen.flow_from_directory(
-    "/content/drive/MyDrive/train (1)",
-    target_size=(IMG_SIZE, IMG_SIZE),
-    batch_size=BATCH_SIZE,
-    class_mode='binary',
-    subset='validation'
-)
-test_datagen = ImageDataGenerator(rescale=1./255)
-
-test_generator = test_datagen.flow_from_directory(
-    "/content/drive/MyDrive/test (1)",
-    target_size=(IMG_SIZE, IMG_SIZE),
-    batch_size=BATCH_SIZE,
-    class_mode='binary'
-)
-
-from google.colab import drive
-drive.mount('/content/drive')
-
-model = keras.Sequential([
-    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, 3)),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(128, (3, 3), activation='relu'),
-    layers.MaxPooling2D((2, 2)),
-    layers.Flatten(),
-    layers.Dense(128, activation='relu'),
-    layers.Dense(1, activation='sigmoid')
-])
-
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
-history = model.fit(train_generator,validation_data=val_generator,epochs=5)
-
-model.save("model.h5","label.txt")
-
-from keras.models import load_model
-import numpy as np
-from PIL import Image, ImageOps
-model = load_model('/content/model.h5')
-class_names = ['its a ripe','its unripe']
-data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-
-image = Image.open("/content/drive/MyDrive/train (1)/Ripe/1 (15).jpg").convert("RGB")
-size = (224, 224)
-image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
-image_array = np.asarray(image)
-normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
-data[0] = normalized_image_array
-
-prediction = model.predict(data)
-index = np.argmax(prediction)
-confidence_score = prediction[0][index]
-print("Result: ", class_names[index], end="")
-print("\n")
-print("Accuracy: ", confidence_score)
